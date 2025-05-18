@@ -13,3 +13,8 @@ Criar o projeto com django.
 
 django-adimn startproject admin .
 '''
+
+## Adiciona umm repositorio remoto ao repositorio local
+'''
+
+git remote add origin https://github.com/kisoritech/postoot.git
