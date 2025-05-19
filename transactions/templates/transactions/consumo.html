@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Calculadora de Consumo de Combustível</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 30px;
+            background-color: #f9f9f9;
+        }
+        h1 {
+            color: #333;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+        input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            box-sizing: border-box;
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #resultado {
+            margin-top: 20px;
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Calculadora de Consumo de Combustível</h1>
+    
+    <label for="distancia">Distância Percorrida (km):</label>
+    <input type="number" id="distancia" step="0.1">
+
+    <label for="tempo">Tempo de Viagem (h):</label>
+    <input type="number" id="tempo" step="0.1">
+
+    <label for="consumoMedio">Consumo Médio do Veículo (km/l):</label>
+    <input type="number" id="consumoMedio" step="0.1">
+
+    <label for="precoCombustivel">Preço do Combustível (R$/l):</label>
+    <input type="number" id="precoCombustivel" step="0.01">
+
+    <button onclick="calcularConsumo()">Calcular</button>
+
+    <div id="resultado"></div>
+
+    <script>
+        function calcularConsumo() {
+            let distancia = parseFloat(document.getElementById("distancia").value) || 0;
+            let tempo = parseFloat(document.getElementById("tempo").value) || 0;
+            let consumoMedio = parseFloat(document.getElementById("consumoMedio").value) || 0;
+            let precoCombustivel = parseFloat(document.getElementById("precoCombustivel").value) || 0;
+
+            if (distancia <= 0 || tempo <= 0 || consumoMedio <= 0 || precoCombustivel <= 0) {
+                alert("Por favor, preencha todos os campos corretamente.");
+                return;
+            }
+
+            let velocidadeMedia = distancia / tempo;
+            let consumoCombustivel = distancia / consumoMedio;
+            let custoTotal = consumoCombustivel * precoCombustivel;
+
+            document.getElementById("resultado").innerHTML = `
+                <b>Resultados:</b><br>
+                Velocidade Média: ${velocidadeMedia.toFixed(2)} km/h <br>
+                Consumo de Combustível: ${consumoCombustivel.toFixed(2)} litros <br>
+                Gasto Total: R$ ${custoTotal.toFixed(2)}
+            `;
+
+            // Envia transação para Django
+            fetch("http://127.0.0.1:8000/transacoes/registrar/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    name: "Cálculo de Consumo",
+                    value: custoTotal.toFixed(2)
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "success") {
+                    console.log("Transação registrada com sucesso. ID:", data.id);
+                } else {
+                    alert("Erro ao salvar transação.");
+                }
+            })
+            .catch(error => {
+                console.error("Erro:", error);
+            });
+        }
+    </script>
+</body>
+</html>

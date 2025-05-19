@@ -2,30 +2,25 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Login</title>
+    <title>Login - Consumo</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background: #f4f6f9;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+            background-color: #f0f4f8;
             margin: 0;
-            flex-direction: column;
+            padding: 0;
         }
 
-        .formulario {
-            background: #ffffff;
-            padding: 30px 40px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            width: 100%;
+        .container {
             max-width: 400px;
-            margin-bottom: 20px;
+            margin: 100px auto;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
 
-        .formulario h2 {
+        h2 {
             text-align: center;
             margin-bottom: 20px;
             color: #333;
@@ -44,23 +39,15 @@
             margin-bottom: 15px;
             border: 1px solid #ccc;
             border-radius: 5px;
-            box-sizing: border-box;
-        }
-
-        .erro {
-            color: #d9534f;
-            text-align: center;
-            margin-bottom: 15px;
         }
 
         button {
             width: 100%;
-            padding: 10px;
             background-color: #007bff;
             color: white;
+            padding: 10px;
             border: none;
             border-radius: 5px;
-            font-size: 16px;
             cursor: pointer;
         }
 
@@ -69,48 +56,57 @@
         }
 
         .admin-link {
-            margin-top: 10px;
             text-align: center;
+            margin-top: 15px;
         }
 
         .admin-link a {
-            display: inline-block;
-            padding: 10px 20px;
-            background-color: #28a745;
-            color: white;
-            border-radius: 5px;
+            color: #007bff;
             text-decoration: none;
-            font-weight: bold;
         }
 
         .admin-link a:hover {
-            background-color: #218838;
+            text-decoration: underline;
+        }
+
+        .message {
+            color: red;
+            text-align: center;
+            margin-bottom: 15px;
         }
     </style>
 </head>
 <body>
-    <div class="formulario">
+    <div class="container">
         <h2>Login</h2>
-        {% if erro %}
-            <p class="erro">{{ erro }}</p>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="message">{{ message }}</div>
+            {% endfor %}
         {% endif %}
+
         <form method="POST">
+            {% csrf_token %}
+            {{ form.as_p }}
             <label for="email">Email:</label>
-            <input type="email" name="email" id="email" required>
+            <input type="email" name="email" required>
 
             <label for="senha">Senha:</label>
-            <input type="password" name="senha" id="senha" required>
+            <input type="password" name="senha" required>
 
             <button type="submit">Entrar</button>
         </form>
 
-        <p><a href="/cadastro_usuario">Criar conta</a></p>
-    </div>
+        <p>Ainda não tem conta?
+            <a href="{% url 'cadastro_usuario' %}">Cadastre-se aqui</a>
+        </p>
 
-    {% if user.is_authenticated and user.is_staff %}
-    <div class="admin-link">
-        <a href="{% url 'admin:index' %}">Painel do Administrador</a>
+        {% if user.is_authenticated and user.is_staff %}
+            <div class="admin-link">
+                <a href="{% url 'admin:index' %}">Painel do Administrador</a>
+            </div>
+        {% endif %}
     </div>
-    {% endif %}
 </body>
 </html>
