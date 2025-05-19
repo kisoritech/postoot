@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Cadastro de Veículo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f4f8;
+            padding: 30px;
+        }
+        h1 {
+            color: #333;
+        }
+        form {
+            background-color: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            width: 400px;
+            margin: auto;
+        }
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px;
+            width: 100%;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Cadastro de Veículo</h1>
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <label for="usuario">Usuário:</label>
+        <select name="usuario" id="usuario" required>
+            <option value="">Selecione um usuário</option>
+            {% for usuario in usuarios %}
+                <option value="{{ usuario.id }}">{{ usuario.username }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="modelo">Modelo:</label>
+        <input type="text" name="modelo" id="modelo" required>
+
+        <label for="placa">Placa:</label>
+        <input type="text" name="placa" id="placa" required>
+
+        <label for="ano">Ano:</label>
+        <input type="number" name="ano" id="ano" required>
+
+        <label for="cor">Cor:</label>
+        <input type="text" name="cor" id="cor">
+
+        <label for="renavam">RENAVAM:</label>
+        <input type="text" name="renavam" id="renavam">
+
+        <button type="submit">Cadastrar Veículo</button>
+    </form>
+
+</body>
+</html>
