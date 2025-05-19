@@ -42,8 +42,11 @@
     </style>
 </head>
 <body>
+
     <h1>Calculadora de Consumo de Combustível</h1>
-    
+
+    <p><strong>Usuário logado:</strong> {{ request.user.username }}</p>
+
     <label for="distancia">Distância Percorrida (km):</label>
     <input type="number" id="distancia" step="0.1">
 
@@ -60,7 +63,17 @@
 
     <div id="resultado"></div>
 
+    <!-- Campo de abastecimento -->
+    <div id="abastecimentoSection" style="display: none;">
+        <label for="abastecido">Quantidade abastecida (litros):</label>
+        <input type="number" id="abastecido" step="0.1">
+
+        <button onclick="registrarTransacao()">Registrar Abastecimento</button>
+    </div>
+
     <script>
+        let resultado = {};
+
         function calcularConsumo() {
             let distancia = parseFloat(document.getElementById("distancia").value) || 0;
             let tempo = parseFloat(document.getElementById("tempo").value) || 0;
@@ -76,36 +89,77 @@
             let consumoCombustivel = distancia / consumoMedio;
             let custoTotal = consumoCombustivel * precoCombustivel;
 
+            resultado = {
+                distancia: distancia,
+                tempo: tempo,
+                consumo: consumoCombustivel.toFixed(2),
+                custo: custoTotal.toFixed(2),
+                consumoMedio: consumoMedio,
+                velocidadeMedia: velocidadeMedia.toFixed(2)
+            };
+
             document.getElementById("resultado").innerHTML = `
                 <b>Resultados:</b><br>
-                Velocidade Média: ${velocidadeMedia.toFixed(2)} km/h <br>
-                Consumo de Combustível: ${consumoCombustivel.toFixed(2)} litros <br>
-                Gasto Total: R$ ${custoTotal.toFixed(2)}
+                Velocidade Média: ${resultado.velocidadeMedia} km/h <br>
+                Consumo Estimado: ${resultado.consumo} litros <br>
+                Gasto Total: R$ ${resultado.custo}
             `;
 
-            // Envia transação para Django
-            fetch("http://127.0.0.1:8000/transacoes/registrar/", {
+            document.getElementById("abastecimentoSection").style.display = "block";
+        }
+
+        function registrarTransacao() {
+            let abastecido = parseFloat(document.getElementById("abastecido").value) || 0;
+
+            if (abastecido <= 0) {
+                alert("Por favor, informe quanto foi abastecido.");
+                return;
+            }
+
+            fetch("/transacoes/registrar/", {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": getCookie("csrftoken")
                 },
                 body: JSON.stringify({
-                    name: "Cálculo de Consumo",
-                    value: custoTotal.toFixed(2)
+                    name: "Registro de Abastecimento",
+                    value: resultado.custo,
+                    abastecido: abastecido,
+                    distancia: resultado.distancia,
+                    tempo: resultado.tempo,
+                    consumo_estimado: resultado.consumo
                 })
             })
             .then(response => response.json())
             .then(data => {
                 if (data.status === "success") {
-                    console.log("Transação registrada com sucesso. ID:", data.id);
+                    alert("Transação registrada com sucesso! ID: " + data.id);
                 } else {
-                    alert("Erro ao salvar transação.");
+                    alert("Erro ao registrar transação.");
                 }
             })
             .catch(error => {
                 console.error("Erro:", error);
             });
         }
+
+        // Função para pegar o CSRF token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
     </script>
+
 </body>
 </html>

@@ -9,7 +9,7 @@ class Transaction(models.Model):
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Data de edição")
     
     def __str__(self):
-        return self.name
+        return f"{self.user.username} - {self.name} - R${self.value}"
     
     class Meta:
         verbose_name = 'Transação'
